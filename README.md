@@ -1,59 +1,87 @@
 # Ransomware-Analysis-in-a-Safe-Environment
 # WannaCry Ransomware Analysis
 
-## Overview
-This report details the process of analyzing the WannaCry ransomware using FLARE VM and REMnux. The goal of this analysis is to perform static and dynamic analysis to understand the malware's behavior, functionality, and potential indicators of compromise (IOCs).
+This report provides a detailed analysis of the WannaCry ransomware using both FLARE VM and REMnux. The focus of the analysis includes basic dynamic analysis, file behavior monitoring, and network traffic observation.
 
 ## Tools Used
-- **FLARE VM** (Windows-based malware analysis platform)
-- **REMnux** (Linux-based malware analysis platform for reverse-engineering and malware research)
-- **PEStudio** (Static analysis tool)
-- **Process Monitor (ProcMon)** (Dynamic analysis tool)
-- **Wireshark** (Network traffic analysis)
+- FLARE VM
+- REMnux
+- Wireshark
+- Process Monitor
+- FakeNet-NG
 
-## Objectives
-- Perform static analysis to gather information about the ransomware binary.
-- Perform dynamic analysis to observe the malware's behavior during execution.
-- Identify network-based Indicators of Compromise (IOCs).
+## Ransomware Sample
+The ransomware sample used in this analysis is WannaCry. All tests were conducted in a safe, isolated environment to prevent unintended damage.
+
+---
 
 ## Static Analysis
-### PEStudio Analysis
-Using PEStudio on FLARE VM, the binary was loaded to inspect its properties. The tool provided insights into:
-- **Imports and Exports**: Analysis of imported functions to identify potentially malicious capabilities.
-- **Indicators**: Warnings indicating suspicious characteristics of the file.
-- **Strings Analysis**: Extraction of readable strings within the binary for clues related to functionality and IOCs.
 
-![PEStudio Analysis](../mnt/data/Screenshot 2025-03-14 004836.png)
+### File Information
+- **File Name:** wannacry.exe
+- **File Size:** 3.5 MB
+- **File Type:** PE32 executable (GUI) Intel 80386, for MS Windows
+
+### Strings Analysis
+- Revealed strings suggesting network communication and file encryption activities.
+- Notable strings: `.wnry`, `tor`, `decryptor`.
+
+---
 
 ## Dynamic Analysis
-### Process Monitoring (ProcMon)
-Process Monitor was used to observe file operations, registry modifications, and process activity. The tool highlighted suspicious activity such as:
-- Creation of files with random filenames.
-- Modifications to registry keys.
-- Execution of encryption routines.
 
-![ProcMon Analysis](../mnt/data/Screenshot 2025-03-14 024840.png)
+### Environment Setup
+- The ransomware sample was executed within a Windows 7 VM equipped with FLARE VM and network monitoring tools.
+- REMnux was used for deeper network analysis.
 
-### Network Analysis (Wireshark)
-Wireshark was utilized to capture network traffic during the ransomware’s execution. Analysis of network packets revealed the following:
-- Communication attempts to known command-and-control (C2) servers.
-- Attempts to propagate via SMB protocol (Exploiting EternalBlue vulnerability).
+---
 
-![Wireshark Analysis](../mnt/data/Screenshot 2025-03-14 024925.png)
+## Behavioral Analysis
 
-## Indicators of Compromise (IOCs)
-- **File Extensions**: Encrypted files had a `.WNCRY` extension.
-- **C2 Servers**: Attempts to connect to malicious IP addresses.
-- **Registry Keys Modified**: Keys related to persistence mechanisms.
+### Process Monitor Analysis
+![Process Monitor Analysis](images/Screenshot%202025-03-14%20004836.png)
+- Process Monitor revealed file modification activities targeting various files with `.wnry` extension.
+- High CPU usage noted due to encryption processes.
 
-## Mitigation & Recommendations
-- Apply security patches (e.g., MS17-010) to prevent exploitation via SMB protocol.
-- Use network-based and host-based intrusion detection systems to detect malicious activities.
-- Regularly back up critical data and maintain offline backups.
+### FakeNet-NG Analysis
+![FakeNet-NG Analysis](images/Screenshot%202025-03-14%20004852.png)
+- FakeNet-NG intercepted DNS queries and HTTP requests attempting to reach a specific kill-switch URL.
+- This URL was hardcoded in the malware to terminate its execution if reachable.
+
+### Network Traffic Analysis with Wireshark
+![Wireshark Analysis](images/Screenshot%202025-03-14%20005136.png)
+- Wireshark captured attempts to communicate with remote servers via TCP.
+- Network packets showed encrypted communication consistent with ransomware behavior.
+
+---
+
+## Encryption Analysis
+
+### Encrypted Files
+![Encrypted Files](images/Screenshot%202025-03-14%20021709.png)
+- Multiple files were encrypted and appended with the `.wnry` extension.
+- A ransom note was dropped in affected directories.
+
+---
+
+## Ransom Note
+![Ransom Note](images/Screenshot%202025-03-14%20021725.png)
+- The ransom note demanded payment in Bitcoin to decrypt the files.
+- It also provided instructions for victims to pay and recover files.
+
+---
 
 ## Conclusion
-The WannaCry ransomware analysis demonstrates the importance of using both static and dynamic analysis techniques. By understanding the malware’s behavior, defenders can create effective detection and mitigation strategies.
+The analysis confirms that the sample is WannaCry ransomware. It spreads via SMB vulnerability (MS17-010) and encrypts user files, demanding a ransom for decryption. The malware is programmed to cease operations if it can successfully reach a specific URL acting as a kill-switch.
+
+Mitigation steps include:
+- Ensuring systems are patched with MS17-010.
+- Maintaining offline backups.
+- Using intrusion detection systems to identify suspicious network activity.
+
+---
 
 ## References
-- [Matt Kiely's Ransomware Analysis Methodology](https://example.com)  
-- [WannaCry Analysis Reports](https://example.com)
+- [WannaCry Ransomware](https://en.wikipedia.org/wiki/WannaCry_ransomware_attack)
+
+---
