@@ -1,87 +1,116 @@
-# Ransomware-Analysis-in-a-Safe-Environment
 # WannaCry Ransomware Analysis
 
-This report provides a detailed analysis of the WannaCry ransomware using both FLARE VM and REMnux. The focus of the analysis includes basic dynamic analysis, file behavior monitoring, and network traffic observation.
+![Analysis Type](https://img.shields.io/badge/Analysis-Static%20%26%20Dynamic-blue)
+![Tools](https://img.shields.io/badge/Tools-FLARE%20VM%20%7C%20REMnux%20%7C%20PE%20Studio%20%7C%20Cutter%20%7C%20Wireshark%20%7C%20ProcMon-green)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-orange)
 
-## Tools Used
-- FLARE VM
-- REMnux
-- Wireshark
-- Process Monitor
-- FakeNet-NG
-
-## Ransomware Sample
-The ransomware sample used in this analysis is WannaCry. All tests were conducted in a safe, isolated environment to prevent unintended damage.
+## 📌 Overview
+This project provides a comprehensive analysis of the WannaCry ransomware sample using both static and dynamic analysis techniques. The objective is to understand how WannaCry functions, its propagation mechanism, and its impact on infected systems.
 
 ---
 
-## Static Analysis
+## 📁 Table of Contents
+- [Analysis Environment](#analysis-environment)
+- [Static Analysis](#static-analysis)
+- [Dynamic Analysis](#dynamic-analysis)
+- [Summary](#summary)
+- [Installation & Usage](#installation--usage)
+- [Disclaimer](#disclaimer)
+- [Author](#author)
 
-### File Information
+---
+
+## 🔍 Analysis Environment
+The analysis was conducted using isolated virtual machines to ensure safety during the process:
+
+### FLARE VM (Windows Analysis)
+- **Tools:** PE Studio, Floss, Capa, Cutter, Process Monitor (ProcMon)
+
+### REMnux (Linux Analysis)
+- **Tools:** INetSim, Wireshark
+
+### Safety Precautions
+- Both VMs were isolated from the internet and set to Host-only Network.
+- Snapshots of both VMs were taken before starting the analysis.
+
+---
+
+## 📊 Static Analysis
+### File Identification
 - **File Name:** wannacry.exe
-- **File Size:** 3.5 MB
-- **File Type:** PE32 executable (GUI) Intel 80386, for MS Windows
+- **File Type:** Executable file
+- **MD5 Hash:** db349b97c37d22f5ea1d1841e3c89eb4
+- **SHA-1 Hash:** e889544aff85ffaf8b0d0da705105dee7c97fe26
+- **SHA-256 Hash:** 24d004a104d4d54034dbcffc2a4b19a11f39008a575aa614ea04703480b1022c
 
-### Strings Analysis
-- Revealed strings suggesting network communication and file encryption activities.
-- Notable strings: `.wnry`, `tor`, `decryptor`.
+### Tools Used
+- **PE Studio, Floss, Capa**
+- Interesting API calls include:
+  - `CryptGetRandom`
+  - `CryptAcquireContextA`
+  - `InternetOpenA`
+  - `InternetOpenUrl`
+  - `CreateServiceA`
+  - `ChangeServiceConfig2A`
 
----
-
-## Dynamic Analysis
-
-### Environment Setup
-- The ransomware sample was executed within a Windows 7 VM equipped with FLARE VM and network monitoring tools.
-- REMnux was used for deeper network analysis.
-
----
-
-## Behavioral Analysis
-
-### Process Monitor Analysis
-![Process Monitor Analysis](images/Screenshot%202025-03-14%20004836.png)
-- Process Monitor revealed file modification activities targeting various files with `.wnry` extension.
-- High CPU usage noted due to encryption processes.
-
-### FakeNet-NG Analysis
-![FakeNet-NG Analysis](images/Screenshot%202025-03-14%20004852.png)
-- FakeNet-NG intercepted DNS queries and HTTP requests attempting to reach a specific kill-switch URL.
-- This URL was hardcoded in the malware to terminate its execution if reachable.
-
-### Network Traffic Analysis with Wireshark
-![Wireshark Analysis](images/Screenshot%202025-03-14%20005136.png)
-- Wireshark captured attempts to communicate with remote servers via TCP.
-- Network packets showed encrypted communication consistent with ransomware behavior.
+### Malware Capabilities
+- Evades detection using anti-analysis techniques (stackstrings, timing checks, etc.).
+- Establishes communication channels via HTTP and socket-based methods.
+- Manipulates files and services for persistence and command execution.
+- Uses TCP/UDP connections for network communication.
+- Compresses and extracts data for exfiltration or payload management.
+- Dynamically links functions to evade static analysis.
 
 ---
 
-## Encryption Analysis
+## 🧩 Dynamic Analysis
+### Network-based Indicators
+- **Tools Used:** Wireshark, InetSim, TCPView, ProcMon.
+- **INetSim Configuration:** Activated to simulate network services.
+- **Wireshark Capture:** Detected suspicious HTTP GET request for Command-and-Control (C2) communication.
+- **Cutter Analysis:** Successful connection to C2 domain stops malware execution. INetSim must be turned off for full detonation.
 
-### Encrypted Files
-![Encrypted Files](images/Screenshot%202025-03-14%20021709.png)
-- Multiple files were encrypted and appended with the `.wnry` extension.
-- A ransom note was dropped in affected directories.
+![Wireshark Capture](images/wireshark_capture.png)
 
----
+### Sample Execution (FLARE VM)
+- **TCPView Analysis:** Failed TCP port 445 (SMB) connections indicate propagation attempts using EternalBlue exploit.
 
-## Ransom Note
-![Ransom Note](images/Screenshot%202025-03-14%20021725.png)
-- The ransom note demanded payment in Bitcoin to decrypt the files.
-- It also provided instructions for victims to pay and recover files.
+![TCPView Analysis](images/tcpview_analysis.png)
 
----
+### Host-based Indicators
+- **Process Monitor Observations:**
+  - Creation of `taskhsvc.exe` in Windows C: drive.
+  - Generation of randomly named directories in `C:\ProgramData`.
+  - Persistent service registration (`tasksche.exe`).
 
-## Conclusion
-The analysis confirms that the sample is WannaCry ransomware. It spreads via SMB vulnerability (MS17-010) and encrypts user files, demanding a ransom for decryption. The malware is programmed to cease operations if it can successfully reach a specific URL acting as a kill-switch.
-
-Mitigation steps include:
-- Ensuring systems are patched with MS17-010.
-- Maintaining offline backups.
-- Using intrusion detection systems to identify suspicious network activity.
+![Process Monitor Observations](images/procmon_observations.png)
 
 ---
 
-## References
-- [WannaCry Ransomware](https://en.wikipedia.org/wiki/WannaCry_ransomware_attack)
+## ✅ Summary
+The WannaCry ransomware sample encrypts files and propagates using the EternalBlue exploit. It employs anti-analysis techniques and persists by creating services and storing files in hidden directories. Network availability plays a critical role in its execution. Disabling INetSim during analysis allows the ransomware to fully deploy its payload.
 
 ---
+
+## 📌 Installation & Usage
+1. Clone the repository:
+```bash
+ git clone https://github.com/YourUsername/WannaCry-Ransomware-Analysis.git
+```
+2. Navigate to the directory:
+```bash
+ cd WannaCry-Ransomware-Analysis
+```
+3. Review the report and other files.
+
+---
+
+## ⚠️ Disclaimer
+This analysis was conducted in a controlled, isolated environment. Attempting to run ransomware samples on a live or network-connected system can result in severe data loss and network damage. Proceed with caution.
+
+---
+
+## 👤 Author
+Elliot Jonah
+
+Feel free to add this to your portfolio and modify it as needed.
