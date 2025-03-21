@@ -1,116 +1,104 @@
-# WannaCry Ransomware Analysis
+# WannaCry Ransomware Analysis Report
 
-![Analysis Type](https://img.shields.io/badge/Analysis-Static%20%26%20Dynamic-blue)
-![Tools](https://img.shields.io/badge/Tools-FLARE%20VM%20%7C%20REMnux%20%7C%20PE%20Studio%20%7C%20Cutter%20%7C%20Wireshark%20%7C%20ProcMon-green)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-orange)
-
-## 📌 Overview
-This project provides a comprehensive analysis of the WannaCry ransomware sample using both static and dynamic analysis techniques. The objective is to understand how WannaCry functions, its propagation mechanism, and its impact on infected systems.
+**Analyst:** Elliot Jonah  
+**Date:** [Date of Analysis]
 
 ---
 
-## 📁 Table of Contents
-- [Analysis Environment](#analysis-environment)
-- [Static Analysis](#static-analysis)
-- [Dynamic Analysis](#dynamic-analysis)
-- [Summary](#summary)
-- [Installation & Usage](#installation--usage)
-- [Disclaimer](#disclaimer)
-- [Author](#author)
+## 📌 Introduction
+In the early summer of 2017, WannaCry was unleashed on the world. Widely considered to be one of the most devastating malware infections to date, WannaCry left a trail of destruction in its wake. It is a classic ransomware cryptoworm, meaning it can encrypt individual hosts and propagate through a network on its own.  
+
+This report provides a comprehensive analysis of the WannaCry ransomware sample using both static and dynamic analysis techniques. The objective is to understand how WannaCry functions, its propagation mechanism, and its impact on infected systems. The analysis was performed on isolated virtual machines: **FLARE VM (Windows-based)** and **REMnux (Linux-based)**.
 
 ---
 
-## 🔍 Analysis Environment
-The analysis was conducted using isolated virtual machines to ensure safety during the process:
-
+## 🔧 Environment Setup
 ### FLARE VM (Windows Analysis)
-- **Tools:** PE Studio, Floss, Capa, Cutter, Process Monitor (ProcMon)
+- **Tools:** PE Studio, Floss, Capa, Cutter, Process Monitor (ProcMon).
 
 ### REMnux (Linux Analysis)
-- **Tools:** INetSim, Wireshark
+- **Tools:** INetSim, Wireshark.
 
 ### Safety Precautions
-- Both VMs were isolated from the internet and set to Host-only Network.
+- Both VMs are isolated from the internet and set to **Host-only Network**.
 - Snapshots of both VMs were taken before starting the analysis.
 
 ---
 
-## 📊 Static Analysis
-### File Identification
-- **File Name:** wannacry.exe
-- **File Type:** Executable file
-- **MD5 Hash:** db349b97c37d22f5ea1d1841e3c89eb4
-- **SHA-1 Hash:** e889544aff85ffaf8b0d0da705105dee7c97fe26
+## 📂 Static Analysis (FLARE VM)
+### 3.a VirusTotal Scan
+- **70/72 vendors flagged the file as malicious.**
+
+### 3.b File Identification
+- **File Name:** wannacry.exe  
+- **File Type:** [Executable file]  
+- **MD5 Hash:** db349b97c37d22f5ea1d1841e3c89eb4  
+- **SHA-1 Hash:** e889544aff85ffaf8b0d0da705105dee7c97fe26  
 - **SHA-256 Hash:** 24d004a104d4d54034dbcffc2a4b19a11f39008a575aa614ea04703480b1022c
 
-### Tools Used
-- **PE Studio, Floss, Capa**
-- Interesting API calls include:
-  - `CryptGetRandom`
-  - `CryptAcquireContextA`
-  - `InternetOpenA`
-  - `InternetOpenUrl`
-  - `CreateServiceA`
-  - `ChangeServiceConfig2A`
+### 3.c Strings Analysis (Tools: PE Studio, Floss, Capa)
+- **Interesting API Calls:**  
+  - CryptGetRandom  
+  - CryptAcquireContextA  
+  - InternetOpenA  
+  - InternetOpenUrl  
+  - CreateServiceA  
+  - ChangeServiceConfig2A
 
-### Malware Capabilities
-- Evades detection using anti-analysis techniques (stackstrings, timing checks, etc.).
-- Establishes communication channels via HTTP and socket-based methods.
-- Manipulates files and services for persistence and command execution.
-- Uses TCP/UDP connections for network communication.
-- Compresses and extracts data for exfiltration or payload management.
-- Dynamically links functions to evade static analysis.
+- **Capa Output:**  
+  - The malware attempts to hide itself, gather information, execute malicious code, and maintain persistence.  
+  - It installs additional tools and terminates processes/threads as part of its malicious activities.
+
+**Capa Analysis Screenshot:**  
+![Capa Analysis](./images/capa_analysis.png)
 
 ---
 
-## 🧩 Dynamic Analysis
-### Network-based Indicators
-- **Tools Used:** Wireshark, InetSim, TCPView, ProcMon.
-- **INetSim Configuration:** Activated to simulate network services.
-- **Wireshark Capture:** Detected suspicious HTTP GET request for Command-and-Control (C2) communication.
-- **Cutter Analysis:** Successful connection to C2 domain stops malware execution. INetSim must be turned off for full detonation.
+## 📊 Dynamic Analysis
+### 4.1 Network-Based Indicators (REMnux)
+- **Tools Used:** Wireshark, INetSim, TCPView, Process Monitor (ProcMon)
+- **Network Simulation Setup (INetSim):** INetSim is turned on and confirmed to be running.
 
-![Wireshark Capture](images/wireshark_capture.png)
+**Wireshark Capture Screenshot:**  
+![Wireshark Capture](./images/wireshark_capture.png)
 
-### Sample Execution (FLARE VM)
-- **TCPView Analysis:** Failed TCP port 445 (SMB) connections indicate propagation attempts using EternalBlue exploit.
+### 4.2 Sample Execution (FLARE VM)
+- **Tools Used:** TCPView, ProcMon
+- The infected machine (10.0.0.5) attempts multiple **TCP connections on port 445 (SMB)**, indicating propagation attempts via the **EternalBlue vulnerability**.
 
-![TCPView Analysis](images/tcpview_analysis.png)
-
-### Host-based Indicators
-- **Process Monitor Observations:**
-  - Creation of `taskhsvc.exe` in Windows C: drive.
-  - Generation of randomly named directories in `C:\ProgramData`.
-  - Persistent service registration (`tasksche.exe`).
-
-![Process Monitor Observations](images/procmon_observations.png)
+**TCPView Screenshot:**  
+![TCPView Analysis](./images/tcpview_analysis.png)
 
 ---
 
-## ✅ Summary
-The WannaCry ransomware sample encrypts files and propagates using the EternalBlue exploit. It employs anti-analysis techniques and persists by creating services and storing files in hidden directories. Network availability plays a critical role in its execution. Disabling INetSim during analysis allows the ransomware to fully deploy its payload.
+## 📝 Host-Based Indicators (FLARE VM)
+### Process Monitor Observations
+- Filtering for `wannacry` processes and monitoring **file operations**.
+- Creation of the file: `taskhsvc.exe` in the `C:\` drive.
+- Another executable with a strange name in the `C:\ProgramData` directory.
+- The directory `hxqfjqteswoy300` is a randomly generated folder used by the malware to store its executables, encryption keys, and encrypted files.
+- A suspicious folder named `bgyurhsfe952` is found, which is likely created to store files and register itself as a service for persistence.
+
+**Process Monitor Screenshot:**  
+![Process Monitor Analysis](./images/procmon_analysis.png)
 
 ---
 
-## 📌 Installation & Usage
-1. Clone the repository:
-```bash
- git clone https://github.com/YourUsername/WannaCry-Ransomware-Analysis.git
-```
-2. Navigate to the directory:
-```bash
- cd WannaCry-Ransomware-Analysis
-```
-3. Review the report and other files.
+## 🔐 Summary of Findings
+- WannaCry is designed to:
+  - **Evade detection** using anti-analysis techniques (stackstrings, timing checks, etc.).
+  - **Establish communication channels** using both HTTP and socket-based methods.
+  - **Manipulate files and services** to achieve persistence and execute commands.
+  - **Perform network communication** using TCP/UDP connections.
+  - **Compress and extract data**, likely for exfiltration or payload management.
+  - **Dynamically link functions**, making static analysis more challenging.
 
 ---
 
-## ⚠️ Disclaimer
-This analysis was conducted in a controlled, isolated environment. Attempting to run ransomware samples on a live or network-connected system can result in severe data loss and network damage. Proceed with caution.
+## 📚 References
+- [Capa Documentation](https://github.com/mandiant/capa)
+- [Wireshark Documentation](https://www.wireshark.org/docs/)
+- [Process Monitor](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
 
 ---
 
-## 👤 Author
-Elliot Jonah
-
-Feel free to add this to your portfolio and modify it as needed.
