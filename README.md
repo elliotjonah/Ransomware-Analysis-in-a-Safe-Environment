@@ -58,12 +58,11 @@ This was the observed symptoms of infection upon initial detonation. After use a
 <img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20001758.png>
 The malware attempts to hide itself, gather information, execute malicious code, and maintain persistence.
 
+
+---
 <img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20001845.png>
 It installs additional tools and terminates processes/threads as part of its malicious activities.
  
-
-**Capa Analysis Screenshot:**  
-![Capa Analysis](./images/capa_analysis.png)
 
 ---
 
@@ -71,17 +70,27 @@ It installs additional tools and terminates processes/threads as part of its mal
 ### 4.1 Network-Based Indicators (REMnux)
 - **Tools Used:** Wireshark, INetSim, TCPView, Process Monitor (ProcMon)
 - **Network Simulation Setup (INetSim):** INetSim is turned on and confirmed to be running.
-<img src = >
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20123126.png>
 
 **Wireshark Capture Screenshot:**  
-![Wireshark Capture](./images/wireshark_capture.png)
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-18%20173538.png>
+The Wireshark capture shows an HTTP GET request from 10.0.0.3 to a suspicious-looking URL (www.iuserfodgjfjasopdfjhgosurjjfsawehrwerqwea.com) hosted on 10.0.0.4, which resembles randomly generated domain names often used by malware for Command-and-Control (C2) communication.
+After this event it seems like the malware does not execute or do anything. So we have to find out why the malware is not executing. We use a tool called Cutter for this investigation.
 
 ### 4.2 Sample Execution (FLARE VM)
-- **Tools Used:** TCPView, ProcMon
+- **Tools Used:** Cutter, TCPView, ProcMon
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20122231.png>
+The code shows that the malware attempts to establish a connection to http://www.iuserfodgjfjasopdfjhgosurjjfsawehrwerqwea.com using the Windows API functions: InternetOpenA and InternetOpenUrlA. If the contact established the malware does not execute.
+What this means is that to detonate the malware successfully, inetsim must be turned off.
+
+
+
+---
+**TCPView Screenshot:** 
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20021709.png>
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20021725.png>
 - The infected machine (10.0.0.5) attempts multiple **TCP connections on port 445 (SMB)**, indicating propagation attempts via the **EternalBlue vulnerability**.
 
-**TCPView Screenshot:**  
-![TCPView Analysis](./images/tcpview_analysis.png)
 
 ---
 
