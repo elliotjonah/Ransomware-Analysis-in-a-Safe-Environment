@@ -23,10 +23,14 @@ This report provides a comprehensive analysis of the WannaCry ransomware sample 
 - Both VMs are isolated from the internet and set to **Host-only Network**.
 - Snapshots of both VMs were taken before starting the analysis.
 
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/adb13e9cfaba8a3fc53b82b770a4f5afd921a68d/Screenshot%202025-03-13%20131536.png>
+This was the observed symptoms of infection upon initial detonation. After use a snapshot to revert the VM to a clean state.
+
 ---
 
 ## 📂 Static Analysis (FLARE VM)
 ### 3.a VirusTotal Scan
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/adb13e9cfaba8a3fc53b82b770a4f5afd921a68d/Screenshot%202025-03-13%20170616.png>
 - **70/72 vendors flagged the file as malicious.**
 
 ### 3.b File Identification
@@ -37,6 +41,11 @@ This report provides a comprehensive analysis of the WannaCry ransomware sample 
 - **SHA-256 Hash:** 24d004a104d4d54034dbcffc2a4b19a11f39008a575aa614ea04703480b1022c
 
 ### 3.c Strings Analysis (Tools: PE Studio, Floss, Capa)
+
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20004626.png>
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20004836.png>
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20004852.png >
+
 - **Interesting API Calls:**  
   - CryptGetRandom  
   - CryptAcquireContextA  
@@ -45,9 +54,13 @@ This report provides a comprehensive analysis of the WannaCry ransomware sample 
   - CreateServiceA  
   - ChangeServiceConfig2A
 
-- **Capa Output:**  
-  - The malware attempts to hide itself, gather information, execute malicious code, and maintain persistence.  
-  - It installs additional tools and terminates processes/threads as part of its malicious activities.
+- **Capa Output:**
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20001758.png>
+The malware attempts to hide itself, gather information, execute malicious code, and maintain persistence.
+
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20001845.png>
+It installs additional tools and terminates processes/threads as part of its malicious activities.
+ 
 
 **Capa Analysis Screenshot:**  
 ![Capa Analysis](./images/capa_analysis.png)
@@ -58,6 +71,7 @@ This report provides a comprehensive analysis of the WannaCry ransomware sample 
 ### 4.1 Network-Based Indicators (REMnux)
 - **Tools Used:** Wireshark, INetSim, TCPView, Process Monitor (ProcMon)
 - **Network Simulation Setup (INetSim):** INetSim is turned on and confirmed to be running.
+<img src = >
 
 **Wireshark Capture Screenshot:**  
 ![Wireshark Capture](./images/wireshark_capture.png)
