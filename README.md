@@ -97,13 +97,16 @@ What this means is that to detonate the malware successfully, inetsim must be tu
 ## 📝 Host-Based Indicators (FLARE VM)
 ### Process Monitor Observations
 - Filtering for `wannacry` processes and monitoring **file operations**.
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-18%20183941.png>
 - Creation of the file: `taskhsvc.exe` in the `C:\` drive.
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20024925.png>
 - Another executable with a strange name in the `C:\ProgramData` directory.
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20030127.png>
 - The directory `hxqfjqteswoy300` is a randomly generated folder used by the malware to store its executables, encryption keys, and encrypted files.
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-14%20025946.png>
 - A suspicious folder named `bgyurhsfe952` is found, which is likely created to store files and register itself as a service for persistence.
+<img src = https://github.com/elliotjonah/Ransomware-Analysis-in-a-Safe-Environment/blob/b98aca996f40e3021134c257a58a72ba4e560a1b/Screenshot%202025-03-18%20191420.png>
 
-**Process Monitor Screenshot:**  
-![Process Monitor Analysis](./images/procmon_analysis.png)
 
 ---
 
