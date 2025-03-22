@@ -1,7 +1,7 @@
 # WannaCry Ransomware Analysis Report
 
 **Analyst:** Elliot Jonah  
-**Date:** [Date of Analysis]
+**Date:** [15th March, 2025]
 
 ---
 
